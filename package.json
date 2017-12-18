@@ -1,0 +1,69 @@
+{
+  "name": "react-redux-analytics-td",
+  "version": "0.0.0.1-beta",
+  "description": "TreasureData plugin for react-redux-analytics",
+  "main": "lib/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "analytics",
+    "TreasureData"
+  ],
+  "files": [
+    "src",
+    "lib"
+  ],
+  "scripts": {
+    "build": "babel src --out-dir lib",
+    "clean": "rimraf lib/*",
+    "lint": "eslint src test",
+    "fixpack": "fixpack",
+    "test": "mocha test --compilers js:babel-core/register --colors --recursive",
+    "test:build": "babel test --out-dir _test",
+    "test:watch": "npm run test:build -- --watch",
+    "preversion": "npm run test",
+    "version": "npm-run-all clean build"
+  },
+  "author": "Recruit Technologies Co.,Ltd.",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "is-in-browser": "^1.1.3",
+    "lodash": "^4.13.1",
+    "react-redux-analytics": "^0.1.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-syntax-trailing-function-commas": "^6.22.0",
+    "babel-plugin-transform-es2015-destructuring": "^6.23.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-power-assert": "1.0.0",
+    "babel-preset-react": "^6.24.1",
+    "chai": "^4.0.2",
+    "enzyme": "^2.9.1",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^15.0.0",
+    "eslint-plugin-dependencies": "^2.3.0",
+    "eslint-plugin-import": "2.2.0",
+    "eslint-plugin-jsx-a11y": "^5.0.1",
+    "eslint-plugin-react": "^7.0.0",
+    "fixpack": "^2.3.1",
+    "jsdom": "^11.1.0",
+    "jsdom-global": "^3.0.2",
+    "mocha": "^3.4.2",
+    "must-call": "^1.0.0",
+    "npm-run-all": "^4.0.2",
+    "power-assert": "^1.4.2",
+    "react-dom": "^15.6.1",
+    "react-test-renderer": "^15.6.1",
+    "rewire": "^2.5.2",
+    "rimraf": "^2.6.1"
+  }
+}
