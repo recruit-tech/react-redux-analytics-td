@@ -13,7 +13,8 @@ export default ({
    config,
    variablesFilter = null,
    pageViewFilter = null,
-   eventFilter = null
+   eventFilter = null,
+   debug = false,
   }) => {
 
   if(!isBrowser){
@@ -26,6 +27,10 @@ export default ({
   const filterVars = filterVariables(variablesFilter)
   const filterPageView = filterAction('pageview')(pageViewFilter)
   const filterEvent = filterAction('event')(eventFilter)
+
+  if(debug){
+    window._treasure = td
+  }
 
   return ({ dispatch, getState }) => (next) => (action) => {
     const { type, payload } = action

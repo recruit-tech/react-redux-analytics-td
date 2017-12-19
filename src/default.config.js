@@ -8,6 +8,7 @@ export default {
   referrerKey: 'referrer',
   locationKey: 'location',
   eventNameKey: 'event',
+  trackTypeKey: 'type',
   dryRun: false,
   urlFormat: {
     dispalyHostname: null,
@@ -18,5 +19,7 @@ export default {
   td: {
     database: 'SET_YOUR_DATABASE_NAME',
     writeKey: 'SET_YOUR_WRITE_KEY',
+    host: 'in.treasuredata.com',
+    pathname: '/js/v3/event/',
   }
 }

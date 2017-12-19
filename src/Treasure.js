@@ -74,46 +74,66 @@ const error = debugFactory(errorNamespace)
     debug(`event track will be recored in '${this.config.eventTable}' table`)
     debug(`td_* values will${this.config.sendTdValues ? '' : ' NOT' } be merged`)
     debug(`falsy values in variables will ${this.config.sendFalsyValues ? 'be sent' : 'be omitted'}`)
-    this.config.sendReferrer && debug(`referrer will be set in '${this.config.referrerKey}' key`)
-    this.config.sendLocation && debug(`location will be set in '${this.config.locationKey}' key`)
+    debug(`track type will be set to '${this.config.trackTypeKey}' key`)
+    this.config.sendReferrer && debug(`referrer will be set to '${this.config.referrerKey}' key`)
+    this.config.sendLocation && debug(`location will be set to '${this.config.locationKey}' key`)
     debug(`eventName will be set to '${this.config.eventNameKey}' key`)
     this.config.urlFormat && debug(`location and referrer will be formatted. rule: ${JSON.stringify(this.config.urlFormat)}`)
     debug(`config set: ${JSON.stringify(this.config)}`)
   }
 
-  sendPageView({location, variables}){
+  async sendPageView({location, variables}){
     if (this.isFirstPageView) {
       this.firstPage({location})
     }else{
       this.pageChanged({location})
     }
-    const composedVars = this.composeVariables({ variables })
-    this.track('pageView', composedVars)
-    debug(`pageView: ${JSON.stringify(composedVars)}`)
+    const composedVars = this.composeVariables({ variables, type: 'pageview' })
+    try {
+      await this.track('pageview', composedVars)
+      debug(`${this.config.dryRun ? '(dry-run)': '(tracked)'} pageview: ${JSON.stringify(composedVars)}`)
+    }catch(e){
+      error(`failed to send event track to the server: ${JSON.stringify(e)}`)
+      throw e
+    }
   }
 
-  sendEvent({ variables, eventName }){
-    const composedVars = this.composeVariables({ variables, eventName })
-    this.track('event', composedVars)
-    debug(`event(${eventName}): ${JSON.stringify(composedVars)}`)
+  async sendEvent({ variables, eventName }){
+    const composedVars = this.composeVariables({ variables, eventName, type: 'event' })
+    try{
+      await this.track('event', composedVars)
+      debug(`${this.config.dryRun ? '(dry-run)': '(tracked)'} event(${eventName}): ${JSON.stringify(composedVars)}`)
+    }catch(e){
+      error(`failed to send event track to the server: ${JSON.stringify(e)}`)
+      throw e
+    }
   }
   
-  //TODO(takanashi): write error handler
-  track(type, variables){
-    if(this.config.dryRun){
-      return
-    }
-    const table = type === 'pageView' ? this.config.pageViewTable : this.config.eventTable
-    if(this.config.sendTdValues){
-      this.td.trackEvent(table, variables)
-    }else{
-      this.td.addRecord(table, variables)
-    }
+  async track(type, variables){
+    return new Promise((resolve, reject) => {
+      if(this.config.dryRun){
+        resolve({ dry: true })
+        return
+      }
+      const table = type === 'pageview' ? this.config.pageViewTable : this.config.eventTable
+      const successCallback = (ret) => {
+        resolve(ret)
+      }
+      const errorCallback = (e) => {
+        reject(e)
+      }
+      if(this.config.sendTdValues){
+        this.td.trackEvent(table, variables, successCallback, errorCallback)
+      }else{
+        this.td.addRecord(table, variables, successCallback, errorCallback)
+      }
+    })
   }
 
   //protected:
-  composeVariables({ variables, eventName }) {
+  composeVariables({ variables, eventName, type }) {
     const composed = { ...variables } 
+    composed[this.config.trackTypeKey] = type
     if(this.config.sendReferrer){
       composed[this.config.referrerKey] = this.composeLocation(this.location.referrer)
     }

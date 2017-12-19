@@ -5,6 +5,9 @@ export const composeLocationString = (urlFormat = {}) => (location) => {
   if(!location){
     return null
   }
+  if(typeof location === 'string'){
+    return location
+  }
   const { dispalyHostname, displayProtocol, showQuery, showHash }  = urlFormat
   const { pathname, search, hash } = location
   //override window.location values by config (i.e to normalize http to https in ReportSuite, aggregate subdomain pages,...)
