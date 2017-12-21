@@ -1,6 +1,6 @@
 {
   "name": "react-redux-analytics-td",
-  "version": "0.0.1-beta6",
+  "version": "0.0.1-beta7",
   "description": "TreasureData plugin for react-redux-analytics",
   "main": "lib/index.js",
   "directories": {
@@ -33,7 +33,8 @@
     "debug": "^2.2.0",
     "is-in-browser": "^1.1.3",
     "lodash": "^4.13.1",
-    "react-redux-analytics": "^0.1.3"
+    "react-redux-analytics": "^0.1.3",
+    "td-js-sdk": "^1.9.1"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
