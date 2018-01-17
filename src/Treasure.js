@@ -1,9 +1,15 @@
 import debugFactory from 'debug'
 import isBrowser from 'is-in-browser';
 import { pickBy } from 'lodash/fp'
-import { configKeyTd, debugNamespace, errorNamespace } from './const'
 import defaultConfig from './default.config.js'
 import { composeLocationString } from './utils'
+import { 
+  configKeyTd,
+  debugNamespace,
+  errorNamespace,
+  TYPE_EVENT,
+  TYPE_PAGEVIEW,
+} from './const'
 
 const debug = debugFactory(debugNamespace)
 const error = debugFactory(errorNamespace)
@@ -88,9 +94,9 @@ const error = debugFactory(errorNamespace)
     }else{
       this.pageChanged({location})
     }
-    const composedVars = this.composeVariables({ variables, type: 'pageview' })
+    const composedVars = this.composeVariables({ variables, type: TYPE_PAGEVIEW})
     try {
-      await this.track('pageview', composedVars)
+      await this.track(TYPE_PAGEVIEW, composedVars)
       debug(`${this.config.dryRun ? '(dry-run)': '(tracked)'} pageview: ${JSON.stringify(composedVars)}`)
     }catch(e){
       error(`failed to send event track to the server: ${JSON.stringify(e)}`)
@@ -99,23 +105,26 @@ const error = debugFactory(errorNamespace)
   }
 
   async sendEvent({ variables, eventName }){
-    const composedVars = this.composeVariables({ variables, eventName, type: 'event' })
+    const composedVars = this.composeVariables({ variables, eventName, type: TYPE_EVENT })
     try{
-      await this.track('event', composedVars)
+      await this.track(TYPE_EVENT, composedVars)
       debug(`${this.config.dryRun ? '(dry-run)': '(tracked)'} event(${eventName}): ${JSON.stringify(composedVars)}`)
     }catch(e){
       error(`failed to send event track to the server: ${JSON.stringify(e)}`)
       throw e
     }
   }
-  
+
   async track(type, variables){
     return new Promise((resolve, reject) => {
       if(this.config.dryRun){
         resolve({ dry: true })
         return
       }
-      const table = type === 'pageview' ? this.config.pageViewTable : this.config.eventTable
+      const table = this.getTableName(type)
+      if(!table){
+        reject('Table name must be supplied.')
+      }
       const successCallback = (ret) => {
         resolve(ret)
       }
@@ -131,14 +140,27 @@ const error = debugFactory(errorNamespace)
   }
 
   //protected:
+  getTableName(type){
+    if(type === TYPE_PAGEVIEW){
+      return this.config.pageViewTable
+    }
+    if(type === TYPE_EVENT){
+      return this.config.eventTable
+    }
+    return null
+  }
+
+  //protected:
   composeVariables({ variables, eventName, type }) {
     const composed = { ...variables } 
     composed[this.config.trackTypeKey] = type
-    if(this.config.sendReferrer){
-      composed[this.config.referrerKey] = this.composeLocation(this.location.referrer)
-    }
-    if(this.config.sendLocation){
-      composed[this.config.locationKey] = this.composeLocation(this.location.current)
+    if(type === TYPE_PAGEVIEW){
+      if(this.config.sendReferrer){
+        composed[this.config.referrerKey] = this.composeLocation(this.location.referrer)
+      }
+      if(this.config.sendLocation){
+        composed[this.config.locationKey] = this.composeLocation(this.location.current)
+      }
     }
     if(eventName){
       composed[this.config.eventNameKey] = eventName
